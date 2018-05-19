@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Фарм рус - аптека</string>
+    <string name="action_settings">Настройки</string>
+    <string name="action_search">Поиск</string>
+
+    <string name="available_on_stock">Наличие на складе</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="price">Цена</string>
+    <string name="currency">₽</string>
+    <string name="search_hint">Поиск лекарства</string>
+</resources>
