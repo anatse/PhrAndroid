@@ -1,5 +1,6 @@
 package pharmrus.org.pharmrus
 
+import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -13,7 +14,7 @@ class ViewHolder(val layout: ViewGroup) : RecyclerView.ViewHolder(layout)
 class ProductAdapter(private val dataSet: SearchResult) : RecyclerView.Adapter<ViewHolder>() {
     private fun createImage (rowData: SearchRow, imageView: ImageView) {
         // Load image from URL
-        if (!rowData.product.drugImage?.isEmpty()) {
+        if (rowData.product.drugImage?.isEmpty() == false) {
             GlideApp
                 .with(imageView.context)
                 .load(rowData.product.drugImage)
@@ -35,15 +36,16 @@ class ProductAdapter(private val dataSet: SearchResult) : RecyclerView.Adapter<V
     /**
      * Function adds money function to Double type wit purpose to format any double values using currency for current locale
      */
-    fun Double.money() = NumberFormat.getCurrencyInstance().format(this)
+    fun Double.money() = NumberFormat.getInstance().format(this)
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val row = dataSet.rows[position]
         val product = row.product
         val resources = holder.layout.context.resources
 
         // Add image
-        createImage (row, holder.layout.drugImage)
+        createImage(row, holder.layout.drugImage)
 
         // Add drug title (full name)
         holder.layout.drugFullName.text = product.drugsFullName
@@ -52,10 +54,10 @@ class ProductAdapter(private val dataSet: SearchResult) : RecyclerView.Adapter<V
         // MNN
         holder.layout.drugMnn.text = product.mnn
         // Availability on stock
-        holder.layout.drugOnStockAvailability.text = "${resources.getString (R.string.available_on_stock)}: ${if (product.ost > 0) resources.getString(R.string.yes) else resources.getString(R.string.no) }"
+        holder.layout.drugOnStockAvailability.text = "${resources.getString(R.string.available_on_stock)}: ${if (product.ost > 0) resources.getString(R.string.yes) else resources.getString(R.string.no)}"
         // Price
         holder.layout.drugPrice.text = "${product.retailPrice.money()} ${resources.getString(R.string.currency)}"
         // Count in cart
-        holder.layout.drugCountInCart.text = "${row.countInCart.money()}"
+        holder.layout.drugCountInCart.text = row.countInCart.money()
     }
 }

@@ -17,19 +17,19 @@ data class Product(
     @SerializedName ("drugsFullName")
     val drugsFullName: String,
     @SerializedName ("drugsShortName")
-    val drugsShortName: String,
+    val drugsShortName: String?,
     @SerializedName ("MNN")
-    val mnn: String,
+    val mnn: String?,
     @SerializedName ("barCode")
     val barCode: String,
     @SerializedName ("producerShortName")
-    val producerShortName: String,
+    val producerShortName: String?,
     @SerializedName ("retailPrice")
     val retailPrice: Double,
     @SerializedName ("ost")
     val ost: Double,
     @SerializedName ("drugImage")
-    val drugImage: String
+    val drugImage: String?
 )
 
 data class SearchRow (
