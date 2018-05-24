@@ -1,5 +1,6 @@
 package pharmrus.org.pharmrus
 
+import android.arch.persistence.room.Entity
 import com.google.gson.annotations.SerializedName
 import io.reactivex.Observable
 import retrofit2.http.Body
@@ -64,7 +65,7 @@ data class SearchRequest (
 interface PharmrusServer {
     @Headers(
         "Accept: application/vnd.github.v3.full+json",
-        "User-Agent: Retrofit-Sample-App"
+        "User-Agent: Pharmrus Android App"
     )
     @POST("drugs/fuzzySearch")
     fun search(@Body request: SearchRequest): Observable<SearchResult>

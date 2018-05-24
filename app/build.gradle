@@ -31,12 +31,18 @@ android {
 }
 
 dependencies {
+    def room_version = "1.1.0" // or, for latest rc, use "1.1.1-rc1"
+
+    implementation "android.arch.persistence.room:runtime:$room_version"
+    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    kapt "android.arch.persistence.room:compiler:$room_version"
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation "com.squareup.retrofit2:adapter-rxjava2:2.4.0"
     implementation "io.reactivex.rxjava2:rxandroid:2.0.2"
-    implementation 'com.google.code.gson:gson:2.7'
+    implementation 'com.google.code.gson:gson:2.8.2'
 
     implementation 'com.github.bumptech.glide:glide:4.7.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
@@ -47,11 +53,14 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:wear:27.1.1'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compileOnly 'com.google.android.wearable:wearable:2.3.0'
 
-    kapt "android.arch.lifecycle:compiler:1.0.0"
+    kapt "android.arch.lifecycle:common-java8:1.1.1"
     kapt 'com.github.bumptech.glide:compiler:4.7.1'
 }
+
+//apply plugin: 'com.google.gms.google-services'
+
