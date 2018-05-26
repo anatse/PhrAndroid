@@ -49,29 +49,50 @@ interface CartDao {
     fun removeItem (cartId: Long, id: String)
 }
 
-@Database(entities = [Cart::class, CartItem::class], version = 2, exportSchema = false)
+@Database(entities = [Cart::class, CartItem::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class CartDatabase : RoomDatabase() {
     abstract fun cartDao(): CartDao
 }
 
 class CartRepository (private val application: Application) {
-    private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
-        override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL("ALTER TABLE cart_item ADD COLUMN price REAL NOT NULL default 0")
-            database.execSQL("ALTER TABLE cart_item ADD COLUMN on_stock INTEGER NOT NULL default 0")
+
+    companion object {
+        private var _db:CartDatabase? = null
+
+        private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE cart_item ADD COLUMN price REAL NOT NULL default 0")
+                database.execSQL("ALTER TABLE cart_item ADD COLUMN on_stock INTEGER NOT NULL default 0")
+            }
+        }
+
+        private val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE cart_item ADD COLUMN producer TEXT")
+            }
+        }
+
+        fun getDatabaseInstance (application: Application):CartDatabase {
+            if (_db == null) {
+                _db = Room
+                        .databaseBuilder(application.applicationContext, CartDatabase::class.java, "cart_db")
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                        .build()
+            }
+
+            return _db!!;
         }
     }
 
-    private val db = Room
-            .databaseBuilder(application.applicationContext, CartDatabase::class.java, "cart_db")
-            .addMigrations(MIGRATION_1_2)
-            .build()
-
+    private val db = getDatabaseInstance(application)
     private val dao = db.cartDao()
 
     @Transaction
-    fun getCountInCart(productId: String):Double = dao.currentCart?.itemList?.find { it.id == productId }?.countInCart ?: 0.0
+    fun getCountInCart(cartId:Long, productId: String):Double = dao.cartItemByCartAndDrug(cartId, productId)?.countInCart ?: 0.0
+
+    @Transaction
+    fun cartItems() = dao.currentCart?.itemList
 
     @Transaction
     private fun upsertItem (cartItem: CartItem): CartItem {
@@ -87,34 +108,31 @@ class CartRepository (private val application: Application) {
     }
 
     @Transaction
-    fun addToCart (product: Product) = Observable.fromCallable {
-        var currentCart = dao.currentCart
-        currentCart?.let {
-            val cartItem = CartItem(
-                    id = product.id,
-                    drugsId = product.drugsId,
-                    drugsFullName = product.drugsFullName,
-                    countInCart = 1.0,
-                    cartId = currentCart.cart.id!!,
-                    price = product.retailPrice,
-                    availableOnStock = if (product.ost > 0) 1 else 0)
-            upsertItem (cartItem)
-            dao.currentCart
-        } ?: run  {
+    fun addToCart (cartItemToAdd: CartItem): Observable<CartView?> = Observable.fromCallable {
+        var cartId = dao.currentCart?.cart?.id
+        if (cartId == null) {
             // Create new cart
             val cart = Cart(id = null, dateCreated = Timestamp(Calendar.getInstance().time.time), orderNo = null, status = CartStatus.NEW)
-            val cartId = dao.insert(cart)
-            val cartItem = CartItem(
-                    id = product.id,
-                    drugsId = product.drugsId,
-                    drugsFullName = product.drugsFullName,
-                    countInCart = 1.0,
-                    cartId = cartId,
-                    price = product.retailPrice,
-                    availableOnStock = if (product.ost > 0) 1 else 0)
-            upsertItem (cartItem)
-            dao.currentCart
+            cartId = dao.insert(cart)
         }
+
+        upsertItem(cartItemToAdd.copy(cartId = cartId, countInCart = 1.0))
+        dao.currentCart
+    }
+
+    @Transaction
+    fun addToCart (product: Product): Observable<CartView?> {
+        val cartItem = CartItem(
+                id = product.id,
+                drugsId = product.drugsId,
+                drugsFullName = product.drugsFullName,
+                producerShortName = product.producerShortName,
+                countInCart = 1.0,
+                cartId = -1,
+                price = product.retailPrice,
+                availableOnStock = if (product.ost > 0) 1 else 0)
+
+        return addToCart(cartItem)
     }
 
     @Transaction

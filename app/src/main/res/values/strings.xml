@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Pharmacy Pharmrus</string>
+    <string name="pharmacy_phone">+79670526466</string>
+
     <string name="action_settings">Settings</string>
     <string name="action_search">Search</string>
 
@@ -7,6 +9,8 @@
     <string name="yes">Yes</string>
     <string name="no">Order</string>
     <string name="price">Price</string>
+    <string name="price_with_total">Price (one/total)</string>
+    <string name="total_price">Total price</string>
     <string name="currency">₽</string>
     <string name="search_hint">Type drug for search</string>
 

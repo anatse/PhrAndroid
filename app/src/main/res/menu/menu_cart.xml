@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="pharmrus.org.pharmrus.CartActivity">
+    <item
+        android:id="@+id/cartAction"
+        app:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_send"
+        android:orderInCategory="1"
+        android:title="" />
+</menu>

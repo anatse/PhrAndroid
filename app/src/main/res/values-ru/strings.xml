@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Фарм рус - аптека</string>
+    <string name="pharmacy_phone">+79670526466</string>
+
     <string name="action_settings">Настройки</string>
     <string name="action_search">Поиск</string>
 
@@ -7,6 +9,9 @@
     <string name="yes">Да</string>
     <string name="no">Заказ</string>
     <string name="price">Цена</string>
+    <string name="price_with_total">Цена (один/всё)</string>
+    <string name="total_price">Всего</string>
+
     <string name="currency">₽</string>
     <string name="search_hint">Поиск лекарства</string>
 </resources>

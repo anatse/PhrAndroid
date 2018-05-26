@@ -11,12 +11,16 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.product_item_view.view.*
 import pharmrus.org.pharmrus.localdb.dao.CartRepository
-import pharmrus.org.pharmrus.localdb.entity.CartItem
 import java.text.NumberFormat
 
-class ViewHolder(val layout: ViewGroup) : RecyclerView.ViewHolder(layout)
+class ProductViewHolder(val layout: ViewGroup) : RecyclerView.ViewHolder(layout)
 
-class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: CartRepository, private val setCountInCart:((count:Int) -> Unit)? = null) : RecyclerView.Adapter<ViewHolder>() {
+/**
+ * Function adds money function to Double type wit purpose to format any double values using currency for current locale
+ */
+fun Double.money() = NumberFormat.getInstance().format(this) ?: ""
+
+class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: CartRepository, private val setCountInCart:((count:Int) -> Unit)? = null) : RecyclerView.Adapter<ProductViewHolder>() {
     private fun createImage (rowData: SearchRow, imageView: ImageView) {
         // Load image from URL
         if (rowData.product.drugImage?.isEmpty() == false) {
@@ -31,20 +35,15 @@ class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: Ca
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.product_item_view, parent, false) as ViewGroup
-        return ViewHolder(view)
+        return ProductViewHolder(view)
     }
 
     override fun getItemCount() = dataSet.rows.size
 
-    /**
-     * Function adds money function to Double type wit purpose to format any double values using currency for current locale
-     */
-    fun Double.money() = NumberFormat.getInstance().format(this)
-
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val row = dataSet.rows[position]
         val product = row.product
         val resources = holder.layout.context.resources

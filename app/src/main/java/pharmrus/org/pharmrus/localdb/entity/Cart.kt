@@ -73,5 +73,8 @@ data class CartItem (
     val price: Double,
 
     @ColumnInfo(name="on_stock")
-    val availableOnStock: Int
+    val availableOnStock: Int,
+
+    @ColumnInfo(name="producer")
+    val producerShortName: String? = null
 )
