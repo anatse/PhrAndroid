@@ -22,6 +22,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import pharmrus.org.pharmrus.localdb.dao.CartRepository
 import pharmrus.org.pharmrus.prefs.SettingsActivity
+import android.widget.TextView
 
 
 /**
@@ -35,16 +36,17 @@ const val USER_UUID_KEY = "com.pharmrus.userUuid"
 
 class MainActivity : AppCompatActivity() {
     lateinit var searchDrugs: SearchView
+    lateinit var cartCounter:TextView
     lateinit var recyclerView: RecyclerView
     lateinit var cartRepo: CartRepository
+    lateinit var queryString: String
 
 //    val androidDeviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)
+//    var selectedColor: Int = -1
+//    lateinit var selectedView: View
 
-    var selectedColor: Int = -1
-    lateinit var selectedView: View
     var disposable: Disposable? = null
 
-    lateinit var queryString: String
 
     override fun onStart() {
         super.onStart()
@@ -60,6 +62,23 @@ class MainActivity : AppCompatActivity() {
         disposable?.dispose()
     }
 
+    /**
+     * High order function variable: sets count in cart badge
+     */
+    private val setBadgeCount =  { count:Int ->
+        if (count == 0) {
+            cartCounter.visibility = View.GONE
+        }
+        else {
+            cartCounter.visibility = View.VISIBLE
+        }
+
+        cartCounter.text = count.toString()
+    }
+
+    /**
+     * Function makes request for drugs and pass result into main view
+     */
     private fun requestDrugs (query: String) {
         queryString = query
         val call = SearchService.service.search(SearchRequest(-1, 0, 100, query))
@@ -76,15 +95,21 @@ class MainActivity : AppCompatActivity() {
                     recyclerView.apply {
                         layoutManager = viewManager
                         setHasFixedSize(true)
-                        adapter = ProductAdapter(result, cartRepo)
+                        adapter = ProductAdapter(result, cartRepo, setBadgeCount)
                     }
+
+                    // Set initial count for cart badge
+                    val totalCount = result.rows.fold (0.0, { acc, cartItem ->  acc + cartItem.countInCart})
+                    setBadgeCount.invoke(totalCount.toInt())
             }, {
                 error -> Snackbar.make(recyclerView, "Error occured when load from network: ${error}", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
+
+                setBadgeCount.invoke(0)
             })
     }
 
-    fun doSearch(query: String?): Boolean {
+    private fun doSearch(query: String?): Boolean {
         requestDrugs(query?.toString() ?: "")
         return true
     }
@@ -94,27 +119,41 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        checkoutCart.setOnClickListener { view ->
+        callPharmacy.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
 
         recyclerView = findViewById(R.id.productRecView)
-
         cartRepo = CartRepository(application)
 
         // First fill drugs list (recommended or from saved state)
         requestDrugs(savedInstanceState?.getString(QUERY_KEY) ?: "")
     }
 
+    /**
+     * Setups cart menu item with badge and action
+     */
+    private fun setupCartAction (menu: Menu) {
+        val cartActionItem = menu.findItem(R.id.cartAction)
+        val cartActionView = cartActionItem.actionView
+        cartCounter = cartActionView.findViewById(R.id.cart_badge)
+
+        cartActionView.setOnClickListener {
+            startActivity(Intent(this, CartActivity::class.java))
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
 
+        setupCartAction(menu)
+
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         val searchItem = menu.findItem(R.id.searchDrugs)
 
-        searchDrugs = searchItem.getActionView() as SearchView
+        searchDrugs = searchItem.actionView as SearchView
         searchDrugs.setSearchableInfo(searchManager.getSearchableInfo(componentName))
         searchDrugs.isIconified = true
 

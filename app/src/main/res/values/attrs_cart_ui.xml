@@ -1,0 +1,10 @@
+<resources>
+    <declare-styleable name="CartUI">
+        <attr name="countInCart" format="string" />
+        <attr name="fullPrice" format="string" />
+        <attr name="badgeColor" format="color" />
+
+        <attr name="textSize" format="dimension" />
+        <attr name="image" format="color|reference" />
+    </declare-styleable>
+</resources>

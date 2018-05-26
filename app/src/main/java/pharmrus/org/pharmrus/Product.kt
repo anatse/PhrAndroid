@@ -1,6 +1,5 @@
 package pharmrus.org.pharmrus
 
-import android.arch.persistence.room.Entity
 import com.google.gson.annotations.SerializedName
 import io.reactivex.Observable
 import retrofit2.http.Body

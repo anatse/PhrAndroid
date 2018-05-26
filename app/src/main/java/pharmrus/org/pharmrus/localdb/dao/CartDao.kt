@@ -8,6 +8,10 @@ import pharmrus.org.pharmrus.Product
 import pharmrus.org.pharmrus.localdb.entity.*
 import java.sql.Timestamp
 import java.util.*
+import android.arch.persistence.db.SupportSQLiteDatabase
+import android.arch.persistence.room.migration.Migration
+
+
 
 @Dao
 interface CartDao {
@@ -45,14 +49,25 @@ interface CartDao {
     fun removeItem (cartId: Long, id: String)
 }
 
-@Database(entities = [Cart::class, CartItem::class], version = 1, exportSchema = false)
+@Database(entities = [Cart::class, CartItem::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class CartDatabase : RoomDatabase() {
     abstract fun cartDao(): CartDao
 }
 
 class CartRepository (private val application: Application) {
-    private val db = Room.databaseBuilder(application.applicationContext, CartDatabase::class.java, "cart_db").fallbackToDestructiveMigration().build()
+    private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE cart_item ADD COLUMN price REAL NOT NULL default 0")
+            database.execSQL("ALTER TABLE cart_item ADD COLUMN on_stock INTEGER NOT NULL default 0")
+        }
+    }
+
+    private val db = Room
+            .databaseBuilder(application.applicationContext, CartDatabase::class.java, "cart_db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
+
     private val dao = db.cartDao()
 
     @Transaction
@@ -61,11 +76,11 @@ class CartRepository (private val application: Application) {
     @Transaction
     private fun upsertItem (cartItem: CartItem): CartItem {
         val foundItem = dao.cartItemByCartAndDrug(cartItem.cartId, cartItem.id)
-        if (foundItem != null) {
+        foundItem?.let {
             val newItem = cartItem.copy(countInCart = cartItem.countInCart + foundItem.countInCart)
             dao.updateItem(newItem)
             return newItem
-        } else {
+        } ?: kotlin.run {
             dao.insertItem(cartItem)
             return cartItem
         }
@@ -74,16 +89,29 @@ class CartRepository (private val application: Application) {
     @Transaction
     fun addToCart (product: Product) = Observable.fromCallable {
         var currentCart = dao.currentCart
-        if (currentCart == null) {
+        currentCart?.let {
+            val cartItem = CartItem(
+                    id = product.id,
+                    drugsId = product.drugsId,
+                    drugsFullName = product.drugsFullName,
+                    countInCart = 1.0,
+                    cartId = currentCart.cart.id!!,
+                    price = product.retailPrice,
+                    availableOnStock = if (product.ost > 0) 1 else 0)
+            upsertItem (cartItem)
+            dao.currentCart
+        } ?: run  {
             // Create new cart
             val cart = Cart(id = null, dateCreated = Timestamp(Calendar.getInstance().time.time), orderNo = null, status = CartStatus.NEW)
             val cartId = dao.insert(cart)
-            val cartItem = CartItem(id = product.id, drugsId = product.drugsId, drugsFullName = product.drugsFullName, countInCart = 1.0, cartId = cartId)
-            upsertItem (cartItem)
-            dao.currentCart
-        }
-        else {
-            val cartItem = CartItem(id = product.id, drugsId = product.drugsId, drugsFullName = product.drugsFullName, countInCart = 1.0, cartId = currentCart.cart.id!!)
+            val cartItem = CartItem(
+                    id = product.id,
+                    drugsId = product.drugsId,
+                    drugsFullName = product.drugsFullName,
+                    countInCart = 1.0,
+                    cartId = cartId,
+                    price = product.retailPrice,
+                    availableOnStock = if (product.ost > 0) 1 else 0)
             upsertItem (cartItem)
             dao.currentCart
         }
@@ -92,7 +120,7 @@ class CartRepository (private val application: Application) {
     @Transaction
     fun removeFromCart (productId: String) = Observable.fromCallable {
         var currentCart = dao.currentCart
-        if (currentCart != null) {
+        currentCart?.let {
             val foundItem = dao.cartItemByCartAndDrug(currentCart.cart.id!!, productId)
             if (foundItem != null) {
                 val cnt = foundItem.countInCart - 1

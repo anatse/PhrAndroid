@@ -67,5 +67,11 @@ data class CartItem (
     val drugsFullName: String,
 
     @ColumnInfo(name="count_in_cart")
-    val countInCart: Double
+    val countInCart: Double,
+
+    @ColumnInfo(name="price")
+    val price: Double,
+
+    @ColumnInfo(name="on_stock")
+    val availableOnStock: Int
 )

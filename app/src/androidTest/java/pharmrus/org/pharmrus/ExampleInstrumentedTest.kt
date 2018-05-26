@@ -2,10 +2,6 @@ package pharmrus.org.pharmrus
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TableRow
-import android.widget.TextView
 
 import org.junit.Test
 import org.junit.runner.RunWith

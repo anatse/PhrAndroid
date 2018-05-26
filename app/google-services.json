@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "929429227570",
+    "firebase_url": "https://pharmrus-8675b.firebaseio.com",
+    "project_id": "pharmrus-8675b",
+    "storage_bucket": "pharmrus-8675b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929429227570:android:8e9fb98db8bc7ddf",
+        "android_client_info": {
+          "package_name": "pharmrus.org.pharmrus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "929429227570-ora322k2u0gijglvaohkqk1c01bhdfgk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pharmrus.org.pharmrus",
+            "certificate_hash": "b08c6b754f71861d8eabe9f4d94abb1778d37e41"
+          }
+        },
+        {
+          "client_id": "929429227570-buauhchq0lm75mks3pu68168tif0vjh6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCneLguZeV2Vngv5pYPWJRbb_N2wQGeZ8U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "929429227570-buauhchq0lm75mks3pu68168tif0vjh6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

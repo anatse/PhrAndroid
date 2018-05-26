@@ -1,29 +1,22 @@
 package pharmrus.org.pharmrus
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.support.design.widget.Snackbar
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.product_item_view.view.*
 import pharmrus.org.pharmrus.localdb.dao.CartRepository
-import pharmrus.org.pharmrus.localdb.entity.Cart
 import pharmrus.org.pharmrus.localdb.entity.CartItem
-import pharmrus.org.pharmrus.localdb.entity.CartView
 import java.text.NumberFormat
-import kotlin.coroutines.experimental.coroutineContext
 
 class ViewHolder(val layout: ViewGroup) : RecyclerView.ViewHolder(layout)
 
-class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: CartRepository) : RecyclerView.Adapter<ViewHolder>() {
+class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: CartRepository, private val setCountInCart:((count:Int) -> Unit)? = null) : RecyclerView.Adapter<ViewHolder>() {
     private fun createImage (rowData: SearchRow, imageView: ImageView) {
         // Load image from URL
         if (rowData.product.drugImage?.isEmpty() == false) {
@@ -74,13 +67,13 @@ class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: Ca
 
         // Add listeners
         holder.layout.drugAddToCart.setOnClickListener {
-//            Snackbar.make(it, "Add row: ${product.drugsFullName}", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-
             cartRepo.addToCart(product).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    result -> holder.layout.drugCountInCart.text = (result?.itemList?.find {it.id == product.id }?.countInCart?.toInt() ?: 0).toString()
+                    result ->
+                        holder.layout.drugCountInCart.text = (result?.itemList?.find {it.id == product.id }?.countInCart?.toInt() ?: 0).toString()
+                        val totalCount = result?.itemList?.fold (0.0, { acc, cartItem ->  acc + cartItem.countInCart})
+                        setCountInCart?.invoke(totalCount?.toInt() ?: 0)
                 }, {
                     error -> Snackbar.make(it, "Error save to database: ${error}", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
@@ -90,13 +83,13 @@ class ProductAdapter(private val dataSet: SearchResult, private val cartRepo: Ca
 
         // Add listeners
         holder.layout.drugRemoveFromCart.setOnClickListener {
-//            Snackbar.make(it, "remove row: ${product.drugsFullName}", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-
-            cartRepo.removeFromCart(product.id).subscribeOn(Schedulers.io())
+           cartRepo.removeFromCart(product.id).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    result -> holder.layout.drugCountInCart.text = (result?.itemList?.find {it.id == product.id }?.countInCart?.toInt() ?: 0).toString()
+                    result ->
+                        holder.layout.drugCountInCart.text = (result?.itemList?.find {it.id == product.id }?.countInCart?.toInt() ?: 0).toString()
+                        val totalCount = result?.itemList?.fold (0.0, { acc, cartItem ->  acc + cartItem.countInCart})
+                        setCountInCart?.invoke(totalCount?.toInt() ?: 0)
                 }, {
                     error -> Snackbar.make(it, "Error save to database: ${error}", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
