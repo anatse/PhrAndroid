@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Pharmacy Pharmrus</string>
+    <string name="app_name">PHARMRUS Pharmacy</string>
     <string name="pharmacy_phone">+79670526466</string>
 
     <string name="action_settings">Settings</string>
@@ -96,4 +96,29 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="title_activity_shipment">ShipmentActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="tab_text_1">Order</string>
+    <string name="tab_text_2">Additional Info</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="shipment_title">Shipment</string>
+    <string name="user_name">User name *</string>
+    <string name="user_phone">User phone *</string>
+    <string name="user_mail">User mail</string>
+    <string name="user_info">User information</string>
+    <string name="pickup">Pickup from pharmacy: Reutov, Komsomolskaya st 10</string>
+    <string name="delivery">Delivery to</string>
+    <string name="cart_send">Send Order</string>
+    <string name="additional_info">Additional information about delivery and someone else</string>
+    <string name="sending">Sending...</string>
+    <string name="sent">Sent</string>
+
+    <!-- Errors -->
+    <string name="user_name_error">Name should be filled</string>
+    <string name="user_phone_error">Phone should be filled properly</string>
+    <string name="order_num">Order No</string>
+    <string name="order_comment">Order comments</string>
 </resources>

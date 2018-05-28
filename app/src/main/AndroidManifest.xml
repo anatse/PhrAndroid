@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="pharmrus.org.pharmrus.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
@@ -34,18 +34,27 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name="pharmrus.org.pharmrus.CartActivity">
+        <activity android:name=".CartActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="pharmrus.org.pharmrus.MainActivity" />
         </activity>
         <activity
-            android:name="pharmrus.org.pharmrus.prefs.SettingsActivity"
+            android:name=".prefs.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="pharmrus.org.pharmrus.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="pharmrus.org.pharmrus.MainActivity" />
+        </activity>
+        <activity
+            android:name=".shipment.ShipmentActivity"
+            android:label="@string/title_activity_shipment"
+            android:parentActivityName=".CartActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="pharmrus.org.pharmrus.CartActivity" />
         </activity>
     </application>
 

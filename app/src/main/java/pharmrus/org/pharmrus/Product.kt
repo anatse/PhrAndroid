@@ -58,19 +58,65 @@ data class SearchRequest (
     @SerializedName ("pageSize")
     val pageSize: Int,
     @SerializedName ("text")
-    val text: String
+    val text: String,
+    @SerializedName("sorts")
+    val sorts: List<String>?
+)
+
+data class RemoteCartItem (
+    @SerializedName ("drugId")
+    val drugId: String,
+    @SerializedName ("drugName")
+    val drugName: String,
+    @SerializedName ("num")
+    val num: Int,
+    @SerializedName ("price")
+    val price: Double,
+    @SerializedName ("availableOnStock")
+    val availableOnStock: Int,
+    @SerializedName ("producer")
+    val producer: String?
+)
+
+data class RemoteCartRequest (
+    @SerializedName ("userUuid")
+    val userUuid: String,
+    @SerializedName ("userName")
+    val userName: String,
+    @SerializedName ("userPhone")
+    val userPhone: String,
+    @SerializedName ("userMail")
+    val userMail: String?,
+    @SerializedName ("comment")
+    val comment: String?,
+    @SerializedName ("items")
+    val items: List<RemoteCartItem>
+)
+
+data class RemoteCartResponse (
+    @SerializedName ("orderNo")
+    val orderNo: String
 )
 
 interface PharmrusServer {
     @Headers(
-        "Accept: application/vnd.github.v3.full+json",
-        "User-Agent: Pharmrus Android App"
+        "Accept: application/json",
+        "User-Agent: Pharmrus Android App",
+        "Content-Language: ru"
     )
     @POST("drugs/fuzzySearch")
     fun search(@Body request: SearchRequest): Observable<SearchResult>
+
+    @Headers(
+        "Accept: application/json",
+        "User-Agent: Pharmrus Android App",
+        "Content-Language: ru"
+    )
+    @POST("drugs/remoteCart")
+    fun sendCard(@Body request: RemoteCartRequest): Observable<RemoteCartResponse>
 }
 
-object SearchService {
+object PharmrusService {
     var retrofit = Retrofit.Builder()
             .baseUrl("http://www.pharmrus24.ru")
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

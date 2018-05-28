@@ -10,7 +10,7 @@ import java.sql.Timestamp
 import java.util.*
 import android.arch.persistence.db.SupportSQLiteDatabase
 import android.arch.persistence.room.migration.Migration
-
+import io.reactivex.internal.operators.observable.ObservableFromCallable
 
 
 @Dao
@@ -47,9 +47,18 @@ interface CartDao {
 
     @Query("DELETE FROM cart_item WHERE cart_id = :cartId and id = :id")
     fun removeItem (cartId: Long, id: String)
+
+    @get:Query("SELECT * FROM user_info")
+    val userInfo: UserSettings?
+
+    @Insert
+    fun insertUserInfo (userSettings: UserSettings)
+
+    @Update
+    fun updateUserInfo (userSettings: UserSettings)
 }
 
-@Database(entities = [Cart::class, CartItem::class], version = 3, exportSchema = false)
+@Database(entities = [Cart::class, CartItem::class, UserSettings::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class CartDatabase : RoomDatabase() {
     abstract fun cartDao(): CartDao
@@ -73,11 +82,18 @@ class CartRepository (private val application: Application) {
             }
         }
 
+        // add user table
+        private val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE user_info (uuid TEXT PRIMARY KEY NOT NULL, mail TEXT, phone TEXT, contact TEXT)")
+            }
+        }
+
         fun getDatabaseInstance (application: Application):CartDatabase {
             if (_db == null) {
                 _db = Room
                         .databaseBuilder(application.applicationContext, CartDatabase::class.java, "cart_db")
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                         .build()
             }
 
@@ -153,5 +169,28 @@ class CartRepository (private val application: Application) {
         dao.currentCart
     }
 
-    fun findAllOrders () =  Observable.fromCallable { db.cartDao().allOrders }
+    fun findAllOrders () =  Observable.fromCallable { dao.allOrders }
+
+    @Transaction
+    fun getUserInfo ():Observable<UserSettings> = Observable.fromCallable {
+        if (dao.userInfo == null) {
+            dao.insertUserInfo(UserSettings(uuid = UUID.randomUUID().toString()))
+        }
+
+        dao.userInfo
+    }
+
+    @Transaction
+    fun updateUserInfo (userSettings: UserSettings) {
+        dao.updateUserInfo(userSettings)
+    }
+
+    @Transaction
+    fun setCartStatus(orderNo: String, status: Int):Observable<String> = Observable.fromCallable {
+        dao.currentCart?.let { cart ->
+            dao.update(cart.cart.copy(orderNo = orderNo, status = status))
+        }
+
+        orderNo
+    }
 }

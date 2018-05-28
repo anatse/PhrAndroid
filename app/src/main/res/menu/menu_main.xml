@@ -19,10 +19,4 @@
         app:actionLayout="@layout/action_cart"
         app:showAsAction="always" />
 
-    <item
-        android:id="@+id/action_settings"
-        android:icon="@android:drawable/ic_menu_edit"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="always" />
 </menu>

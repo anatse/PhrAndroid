@@ -1,15 +1,10 @@
 package pharmrus.org.pharmrus
 
-import android.Manifest
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -29,7 +24,9 @@ import pharmrus.org.pharmrus.localdb.dao.CartRepository
 import pharmrus.org.pharmrus.prefs.SettingsActivity
 import android.widget.TextView
 import android.util.Log
-import kotlinx.android.synthetic.main.cart_item_view.view.*
+import android.view.CollapsibleActionView
+import pharmrus.org.pharmrus.utils.CallUtility
+import pharmrus.org.pharmrus.utils.MY_PERMISSIONS_REQUEST_CALL_PHONE
 
 /**
  * Add glide functional for download images
@@ -39,11 +36,11 @@ class MyAppGlideModule : AppGlideModule()
 
 const val QUERY_KEY = "com.pharmrus.query"
 const val USER_UUID_KEY = "com.pharmrus.userUuid"
-const val MY_PERMISSIONS_REQUEST_CALL_PHONE = 1001
 
 class MainActivity : AppCompatActivity() {
     lateinit var searchDrugs: SearchView
     lateinit var cartCounter:TextView
+    lateinit var cartActionView: View
     lateinit var recyclerView: RecyclerView
     lateinit var cartRepo: CartRepository
     lateinit var queryString: String
@@ -73,9 +70,11 @@ class MainActivity : AppCompatActivity() {
     private val setBadgeCount =  { count:Int ->
         if (count == 0) {
             cartCounter.visibility = View.GONE
+            cartActionView.isEnabled = false
         }
         else {
             cartCounter.visibility = View.VISIBLE
+            cartActionView.isEnabled = true
         }
 
         cartCounter.text = count.toString()
@@ -86,7 +85,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun requestDrugs (query: String) {
         queryString = query
-        val call = SearchService.service.search(SearchRequest(-1, 0, 100, query))
+        val call = PharmrusService.service.search(SearchRequest(-1, 0, 100, query, listOf("ost:-1", "retailPrice:-1")))
         disposable?.dispose()
         disposable = call.switchMap {
                 // Merge with count in cart from local database
@@ -129,27 +128,7 @@ class MainActivity : AppCompatActivity() {
          * Call button. In android API >= 23 its needs to ask user for permission therefore this function so long
          */
         callPharmacy.setOnClickListener { view ->
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CALL_PHONE)) {
-                    Snackbar.make(view, "Need info", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                } else {
-                    // No explanation needed, we can request the permission.
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), MY_PERMISSIONS_REQUEST_CALL_PHONE)
-                }
-            } else {
-                val intent = Intent(Intent.ACTION_CALL)
-                intent.data = Uri.parse("tel:" + resources.getString(R.string.pharmacy_phone))
-
-                // Make call
-                try {
-                    startActivity(intent)
-                } catch (ex: SecurityException) {
-                    Snackbar.make(view, "Insufficient privileges to make call", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                }
-            }
+            CallUtility.callPharmacyListener(view, this)
         }
 
         recyclerView = findViewById(R.id.productRecView)
@@ -164,7 +143,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun setupCartAction (menu: Menu) {
         val cartActionItem = menu.findItem(R.id.cartAction)
-        val cartActionView = cartActionItem.actionView
+        cartActionView = cartActionItem.actionView
         cartCounter = cartActionView.findViewById(R.id.cart_badge)
 
         cartActionView.setOnClickListener {
@@ -203,23 +182,7 @@ class MainActivity : AppCompatActivity() {
         if (!searchDrugs.query.toString().equals(queryString, true))
             searchDrugs.setQuery(queryString, false)
 
-        val settings = menu.findItem(R.id.action_settings)
-        settings.setOnMenuItemClickListener {
-            val intent = Intent(this, SettingsActivity::class.java).apply {
-                putExtra(QUERY_KEY, queryString)
-            }
-            startActivity(intent)
-             true
-        }
-
         return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     /**
@@ -239,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun doSearch(query: String?): Boolean {
+    private fun doSearch(query: String?):Boolean {
         requestDrugs(query?.toString() ?: "")
         return true
     }
@@ -247,29 +210,8 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             MY_PERMISSIONS_REQUEST_CALL_PHONE -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-
-                    val intent = Intent(Intent.ACTION_CALL)
-                    intent.data = Uri.parse("tel:" + resources.getString(R.string.pharmacy_phone))
-
-                    // Make call
-                    try {
-                        startActivity(intent)
-                    } catch (ex:SecurityException) {
-                        Log.e("error", "When trying to call", ex)
-                    }
-
-                } else {
-                    Snackbar.make(recyclerView, "Permission denied for make calls", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                    Log.w("warning", "Permission denied for make calls")
-                }
-
-                return
+                CallUtility.processPermissionCallRequest(this, grantResults)
             }
-
-        // Add other 'when' lines to check for other
-        // permissions this app might request.
             else -> {
                 // Ignore all other requests.
             }

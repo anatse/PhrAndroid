@@ -67,4 +67,14 @@
                 </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/callPharmacyCart"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_margin="@dimen/fab_margin"
+        android:alpha="0.50"
+        app:backgroundTint="@android:color/holo_green_dark"
+        app:srcCompat="@android:drawable/stat_sys_phone_call" />
 </android.support.design.widget.CoordinatorLayout>

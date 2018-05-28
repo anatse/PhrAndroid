@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="pharmrus.org.pharmrus.CartActivity">
     <item
-        android:id="@+id/cartAction"
+        android:id="@+id/cartShipmentAction"
         app:showAsAction="always"
         android:icon="@android:drawable/ic_menu_send"
         android:orderInCategory="1"

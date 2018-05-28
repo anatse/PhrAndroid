@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Фарм рус - аптека</string>
+    <string name="app_name">ФАРМРУС - аптека</string>
     <string name="pharmacy_phone">+79670526466</string>
 
     <string name="action_settings">Настройки</string>
@@ -14,4 +14,24 @@
 
     <string name="currency">₽</string>
     <string name="search_hint">Поиск лекарства</string>
+
+    <string name="tab_text_1">Заказ</string>
+    <string name="tab_text_2">Доп информация</string>
+    <string name="shipment_title">Доставка</string>
+    <string name="user_name">Имя *</string>
+    <string name="user_phone">Телефон для связи *</string>
+    <string name="user_mail">Эл. почта</string>
+    <string name="user_info">Информация о получателе</string>
+    <string name="pickup">Самовывоз</string>
+    <string name="delivery">Доставка недоступна</string>
+    <string name="cart_send">Заказ</string>
+    <string name="additional_info">Дополнительная информация о доставке и всякая другая прочай</string>
+    <string name="sending">Отправка...</string>
+    <string name="sent">Отправлено</string>
+
+    <!-- Errors -->
+    <string name="user_name_error">Имя необходимо заполнить</string>
+    <string name="user_phone_error">Телефон должен быть заполнен правильно</string>
+    <string name="order_num">Номер заказа</string>
+    <string name="order_comment">Комментарий</string>
 </resources>

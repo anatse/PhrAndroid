@@ -39,7 +39,7 @@ class CartAdapter(private val dataSet: List<CartItem>, private val cartRepo: Car
         holder.layout.cartDrugCountInCart.text = row.countInCart.money()
 
         // Set total price
-        setTotalPrice?.invoke(dataSet.fold (0.0, { acc, cartItem ->  acc + (cartItem.countInCart * cartItem.price)}) ?: 0.0)
+        setTotalPrice?.invoke(dataSet.fold (0.0, { acc, cartItem ->  acc + (cartItem.countInCart * cartItem.price)}))
 
         // Add listeners
         holder.layout.cartDrugAddToCart.setOnClickListener {
